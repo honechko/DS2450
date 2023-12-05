@@ -1,0 +1,22 @@
+--- linux-5.4.242/drivers/gpio/gpiolib.c	2023-04-26 12:24:06.000000000 +0300
++++ linux-5.4.242/drivers/gpio/gpiolib.c	2023-06-14 18:39:42.541689375 +0300
+@@ -3337,6 +3337,9 @@
+ 		unsigned long *mask, *bits;
+ 		int first, j, ret;
+ 
++		if (!chip)
++			return -ENODEV;
++
+ 		if (likely(chip->ngpio <= FASTPATH_NGPIO)) {
+ 			mask = fastpath;
+ 		} else {
+@@ -3620,6 +3623,9 @@
+ 		unsigned long *mask, *bits;
+ 		int count = 0;
+ 
++		if (!chip)
++			return -ENODEV;
++
+ 		if (likely(chip->ngpio <= FASTPATH_NGPIO)) {
+ 			mask = fastpath;
+ 		} else {

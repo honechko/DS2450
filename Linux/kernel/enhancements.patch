@@ -1,0 +1,31 @@
+--- linux-5.4.242/drivers/w1/slaves/w1_ds2450.c	2023-06-25 15:56:54.467906192 +0300
++++ linux-5.4.242/drivers/w1/slaves/w1_ds2450.c	2023-06-25 16:10:37.699935565 +0300
+@@ -1,5 +1,5 @@
+ //#define DEBUG
+-//#define HAVE_W1_ACTIVITY_COUNTER
++#define HAVE_W1_ACTIVITY_COUNTER
+ #define HAVE_W1_TOUCH_BLOCK
+ #include <linux/kernel.h>
+ #include <linux/module.h>
+--- linux-5.4.242/drivers/w1/w1_io.c	2023-04-26 12:24:06.000000000 +0300
++++ linux-5.4.242/drivers/w1/w1_io.c	2023-06-19 00:10:11.391647279 +0300
+@@ -322,6 +327,8 @@
+ 
+ 	if(w1_disable_irqs) local_irq_save(flags);
+ 
++	dev->activity_counter++;
++
+ 	if (dev->bus_master->reset_bus)
+ 		result = dev->bus_master->reset_bus(dev->bus_master->data) & 0x1;
+ 	else {
+--- linux-5.4.242/include/linux/w1.h	2023-04-26 12:24:06.000000000 +0300
++++ linux-5.4.242/include/linux/w1.h	2023-06-19 00:05:15.940642459 +0300
+@@ -238,6 +240,8 @@
+ 	struct w1_bus_master	*bus_master;
+ 
+ 	u32			seq;
++
++	u64			activity_counter;
+ };
+ 
+ int w1_add_master_device(struct w1_bus_master *master);

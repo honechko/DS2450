@@ -1,0 +1,45 @@
+--- Kconfig	2023-04-26 12:24:06.000000000 +0300
++++ Kconfig	2023-06-23 21:48:49.314844906 +0300
+@@ -101,6 +101,42 @@
+ 	  Say Y here if you want to use a 1-wire
+ 	  DS2438 Smart Battery Monitor device support
+ 
++config W1_SLAVE_DS2450
++	tristate "DS2450 compatible Port Expander 0x20 family support"
++	select CRC16
++	help
++	  Say Y here if you want to use a 1-wire DS2450 compatible
++	  Port Expander
++
++config W1_SLAVE_DS2450_SPI
++	bool "Include 1-wire to SPI-master bridge support"
++	depends on W1_SLAVE_DS2450 && SPI
++	default y
++	help
++	  Say Y here to include support for 1-wire to SPI-master bridge
++	  extension.
++
++config W1_SLAVE_DS2450_GPIO
++	bool "Include GPIO framework support"
++	depends on W1_SLAVE_DS2450 && GPIOLIB
++	default y
++	help
++	  Say Y here to include GPIO framework support.
++
++config W1_SLAVE_DS2450_PWM
++	bool "Include PWM framework support"
++	depends on W1_SLAVE_DS2450 && PWM
++	default y
++	help
++	  Say Y here to include PWM framework support.
++
++config W1_SLAVE_DS2450_IIO
++	bool "Include Industrial IO framework support"
++	depends on W1_SLAVE_DS2450 && IIO
++	default y
++	help
++	  Say Y here to include Industrial IO framework support.
++
+ config W1_SLAVE_DS250X
+ 	tristate "512b/1kb/16kb EPROM family support"
+ 	select CRC16

@@ -1,0 +1,28 @@
+--- linux-5.4.242/drivers/w1/w1.c	2023-04-26 12:24:06.000000000 +0300
++++ linux-5.4.242/drivers/w1/w1.c	2023-06-08 20:26:57.409892731 +0300
+@@ -743,10 +743,12 @@
+ 	dev_info(&dev->dev, "Attaching one wire slave %02x.%012llx crc %02x\n",
+ 		  rn->family, (unsigned long long)rn->id, rn->crc);
+ 
+-	/* slave modules need to be loaded in a context with unlocked mutex */
+-	mutex_unlock(&dev->mutex);
+-	request_module("w1-family-0x%02X", rn->family);
+-	mutex_lock(&dev->mutex);
++	if (!w1_family_registered(rn->family)) {
++		/* slave modules need to be loaded in a context with unlocked mutex */
++		mutex_unlock(&dev->mutex);
++		request_module("w1-family-0x%02X", rn->family);
++		mutex_lock(&dev->mutex);
++	}
+ 
+ 	spin_lock(&w1_flock);
+ 	f = w1_family_registered(rn->family);
+@@ -765,8 +767,6 @@
+ 	if (err < 0) {
+ 		dev_err(&dev->dev, "%s: Attaching %s failed.\n", __func__,
+ 			 sl->name);
+-		dev->slave_count--;
+-		w1_family_put(sl->family);
+ 		atomic_dec(&sl->master->refcnt);
+ 		kfree(sl);
+ 		return err;
