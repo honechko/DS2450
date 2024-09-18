@@ -1,0 +1,26 @@
+# activate functions on specific device
+ACTION=="add", SUBSYSTEM=="w1", KERNEL=="20-594e480f4241",\
+ ATTR{gpio_enable}+="1",\
+ ATTR{spi_bind}+="0 spidev",\
+ ATTR{spi_bind}+="1 bmp280"
+
+# activate functions on specific device
+ACTION=="add", SUBSYSTEM=="w1", KERNEL=="20-594e480f4242",\
+ ATTR{iio_enable}+="1"
+
+# gpiochip on any slave
+ACTION=="add", SUBSYSTEM=="gpio",   DRIVERS=="w1_slave_driver",\
+ SYMLINK+="gpiochip_%b", MODE="0666"
+
+# spidev on any slave & cs
+ACTION=="add", SUBSYSTEM=="spidev", DRIVERS=="w1_slave_driver",\
+ SYMLINK+="spidev_%b.%n", MODE="0666"
+
+# iiodev on any slave
+ACTION=="add", SUBSYSTEM=="iio",    DRIVERS=="w1_slave_driver",\
+ DEVPATH!="*/spi*", SYMLINK+="iio_%b", MODE="0666"
+
+# iiodev via SPI on specific slave
+ACTION=="add", SUBSYSTEM=="iio",    KERNELS=="20-594e480f4241",\
+ DEVPATH=="*/spi0.1/*", SYMLINK+="ow_bmp280", MODE="0666"
+
