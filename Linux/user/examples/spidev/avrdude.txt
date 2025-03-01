@@ -1,0 +1,2 @@
+# see also udev.rules
+avrdude -c linuxspi -E noreset -P /dev/spidev_20-594e480f4241.0:/dev/gpiochip_20-594e480f4241:0 -p m328p -U flash:r:dump.hex:i

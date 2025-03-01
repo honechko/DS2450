@@ -1,0 +1,389 @@
+<html><head>
+<script language=javascript>
+var srv, dir, dev, tm;
+function ca(s) {
+ var i, m = ["por","adf0","adf1","adf2","adf3","adf4","afha","afhb","afhc","afhd","afla","aflb","aflc","afld"];
+ document.getElementById("ca").checked = false;
+ for (i = 0; m.length > i; i++)
+  if (s)
+   document.getElementById(m[i]).checked = false;
+  else
+   document.getElementById("ca").checked |= document.getElementById(m[i]).checked;
+}
+function fl(s) {
+ var i, m = [];
+ document.getElementById("raw").innerHTML = "Memory: " + s;
+ for (i = 0; 32 > i; i++) m[i] = parseInt(s.substr(i*2, 2), 16);
+ document.getElementById("por").checked = !!(m[9] & 128);
+ document.getElementById("adf0").checked = !!(m[9]  & 64);
+ document.getElementById("adf1").checked = !!(m[31] & 4);
+ document.getElementById("adf2").checked = !!(m[11] & 64);
+ document.getElementById("adf3").checked = !!(m[13] & 64);
+ document.getElementById("adf4").checked = !!(m[15] & 64);
+ ss("ade0", (m[9]  & 2) ? (m[9]  & 1) ? 2 : 1 : 0);
+ ss("ade1", (m[31] & 2) ? (m[31] & 1) ? 2 : 1 : 0);
+ ss("ade2", (m[11] & 2) ? (m[11] & 1) ? 2 : 1 : 0);
+ ss("ade3", (m[13] & 2) ? (m[13] & 1) ? 2 : 1 : 0);
+ ss("ade4", (m[15] & 2) ? (m[15] & 1) ? 2 : 1 : 0);
+ document.getElementById("di0").innerHTML = (m[8]  & 32) ? "high" : "low";
+ document.getElementById("di1").innerHTML = (m[31] & 32) ? "high" : "low";
+ document.getElementById("di2").innerHTML = (m[10] & 32) ? "high" : "low";
+ document.getElementById("di3").innerHTML = (m[12] & 32) ? "high" : "low";
+ document.getElementById("di4").innerHTML = (m[14] & 32) ? "high" : "low";
+ ss("dm0", (m[8]  >> 6) & 3);
+ ss("dm1", (m[31] >> 6) & 3);
+ ss("dm2", (m[10] >> 6) & 3);
+ ss("dm3", (m[12] >> 6) & 3);
+ ss("dm4", (m[14] >> 6) & 3);
+ document.getElementById("pwm").value = m[30];
+ document.getElementById("afha").checked = !!(m[9]  & 32);
+ document.getElementById("afhb").checked = !!(m[11] & 32);
+ document.getElementById("afhc").checked = !!(m[13] & 32);
+ document.getElementById("afhd").checked = !!(m[15] & 32);
+ document.getElementById("afla").checked = !!(m[9]  & 16);
+ document.getElementById("aflb").checked = !!(m[11] & 16);
+ document.getElementById("aflc").checked = !!(m[13] & 16);
+ document.getElementById("afld").checked = !!(m[15] & 16);
+ ss("aea", (m[9]  >> 2) & 3);
+ ss("aeb", (m[11] >> 2) & 3);
+ ss("aec", (m[13] >> 2) & 3);
+ ss("aed", (m[15] >> 2) & 3);
+ document.getElementById("thla").value = m[16];
+ document.getElementById("thha").value = m[17];
+ document.getElementById("thlb").value = m[18];
+ document.getElementById("thhb").value = m[19];
+ document.getElementById("thlc").value = m[20];
+ document.getElementById("thhc").value = m[21];
+ document.getElementById("thld").value = m[22];
+ document.getElementById("thhd").value = m[23];
+ document.getElementById("va").innerHTML = m[1] + m[0] / 256;
+ document.getElementById("vb").innerHTML = m[3] + m[2] / 256;
+ document.getElementById("vc").innerHTML = m[5] + m[4] / 256;
+ document.getElementById("vd").innerHTML = m[7] + m[6] / 256;
+ ss("rpa", (m[8]  & 16) | ((m[8]  + 15) & 15));
+ ss("rpb", (m[10] & 16) | ((m[10] + 15) & 15));
+ ss("rpc", (m[12] & 16) | ((m[12] + 15) & 15));
+ ss("rpd", (m[14] & 16) | ((m[14] + 15) & 15));
+ ca();
+}
+function sv() {
+ var i, m = [];
+ for (i = 0; 32 > i; i++) m.push(0);
+ if (document.getElementById("por").checked) {
+  m[9] |= 128; m[11] |= 128; m[13] |= 128; m[15] |= 128;
+ }
+ if (!document.getElementById("adf0").checked) m[9]  |= 64;
+ if (!document.getElementById("adf1").checked) m[31] |= 4;
+ if (!document.getElementById("adf2").checked) m[11] |= 64;
+ if (!document.getElementById("adf3").checked) m[13] |= 64;
+ if (!document.getElementById("adf4").checked) m[15] |= 64;
+ i = sg("ade0"); if (i) m[9]  |= 2; if (i > 1) m[9]  |= 1;
+ i = sg("ade1"); if (i) m[31] |= 2; if (i > 1) m[31] |= 1;
+ i = sg("ade2"); if (i) m[11] |= 2; if (i > 1) m[11] |= 1;
+ i = sg("ade3"); if (i) m[13] |= 2; if (i > 1) m[13] |= 1;
+ i = sg("ade4"); if (i) m[15] |= 2; if (i > 1) m[15] |= 1;
+ m[8]  |= (sg("dm0") & 3) << 6;
+ m[31] |= (sg("dm1") & 3) << 6;
+ m[10] |= (sg("dm2") & 3) << 6;
+ m[12] |= (sg("dm3") & 3) << 6;
+ m[14] |= (sg("dm4") & 3) << 6;
+ m[30] = parseInt(document.getElementById("pwm").value, 10);
+ if (document.getElementById("afha").checked) m[9]  |= 32;
+ if (document.getElementById("afhb").checked) m[11] |= 32;
+ if (document.getElementById("afhc").checked) m[13] |= 32;
+ if (document.getElementById("afhd").checked) m[15] |= 32;
+ if (document.getElementById("afla").checked) m[9]  |= 16;
+ if (document.getElementById("aflb").checked) m[11] |= 16;
+ if (document.getElementById("aflc").checked) m[13] |= 16;
+ if (document.getElementById("afld").checked) m[15] |= 16;
+ m[9]  |= (sg("aea") & 3) << 2;
+ m[11] |= (sg("aeb") & 3) << 2;
+ m[13] |= (sg("aec") & 3) << 2;
+ m[15] |= (sg("aed") & 3) << 2;
+ m[16] = parseInt(document.getElementById("thla").value, 10);
+ m[17] = parseInt(document.getElementById("thha").value, 10);
+ m[18] = parseInt(document.getElementById("thlb").value, 10);
+ m[19] = parseInt(document.getElementById("thhb").value, 10);
+ m[20] = parseInt(document.getElementById("thlc").value, 10);
+ m[21] = parseInt(document.getElementById("thhc").value, 10);
+ m[22] = parseInt(document.getElementById("thld").value, 10);
+ m[23] = parseInt(document.getElementById("thhd").value, 10);
+ i = sg("rpa"); m[8]  |= (i & 16) | ((i + 1) & 15);
+ i = sg("rpb"); m[10] |= (i & 16) | ((i + 1) & 15);
+ i = sg("rpc"); m[12] |= (i & 16) | ((i + 1) & 15);
+ i = sg("rpd"); m[14] |= (i & 16) | ((i + 1) & 15);
+ document.getElementById("sv").disabled = true;
+ xr(dev+"/pages/page.2?page.2="+hs(m,16,8), function(t) {
+  xr(dev+"/pages/page.3?page.3="+hs(m,24,8), function(t) {
+   xr(dev+"/pages?page.1="+hs(m,8,8), function(t) {
+    if (t.status == 200 && typeof t.response === "object" && typeof t.response["page.ALL"] === "string")
+     fl(t.response["page.ALL"]);
+    else if (!document.getElementById("rl").disabled)
+     rl(1);
+    document.getElementById("sv").disabled = false;
+   });
+  });
+ });
+}
+function rc(s) {
+ var i, m = [];
+ for (i = 0; 32 > i; i++) m[i] = parseInt(s.substr(i*2, 2), 16);
+ return (
+  sg("ade0") != ((m[9]  & 2) ? (m[9]  & 1) ? 2 : 1 : 0) ||
+  sg("ade2") != ((m[11] & 2) ? (m[11] & 1) ? 2 : 1 : 0) ||
+  sg("ade3") != ((m[13] & 2) ? (m[13] & 1) ? 2 : 1 : 0) ||
+  sg("ade4") != ((m[15] & 2) ? (m[15] & 1) ? 2 : 1 : 0) ||
+  sg("rpa") != ((m[8]  & 16) | ((m[8]  + 15) & 15)) ||
+  sg("rpb") != ((m[10] & 16) | ((m[10] + 15) & 15)) ||
+  sg("rpc") != ((m[12] & 16) | ((m[12] + 15) & 15)) ||
+  sg("rpd") != ((m[14] & 16) | ((m[14] + 15) & 15)));
+}
+function rf(s) {
+ var i, m = [];
+ for (i = 0; 32 > i; i++) m[i] = parseInt(s.substr(i*2, 2), 16);
+ for (i = 8; 16 > i; i+=2) m[i] &= 240;
+ for (i = 9; 16 > i; i+=2) m[i] &= 190;
+ if (sg("ade0") > 1) m[9]  |= 1;
+ if (sg("ade2") > 1) m[11] |= 1;
+ if (sg("ade3") > 1) m[13] |= 1;
+ if (sg("ade4") > 1) m[15] |= 1;
+ m[8]  |= (sg("rpa") + 1) & 15;
+ m[10] |= (sg("rpb") + 1) & 15;
+ m[12] |= (sg("rpc") + 1) & 15;
+ m[14] |= (sg("rpd") + 1) & 15;
+ return hs(m,8,8);
+}
+function ac() {
+ if (!document.getElementById("rl").disabled) tm = null;
+ document.getElementById("ac").disabled = true;
+ xr(dev+"/convert.ALL", function(t) {
+  if (t.status == 200 && typeof t.response === "object") {
+   xr(dev+"/pages", function(t) {
+    if (t.status == 200 && typeof t.response === "object" && typeof t.response["page.ALL"] === "string")
+     fl(t.response["page.ALL"]);
+    else if (!document.getElementById("rl").disabled)
+     rl(1);
+    if (document.getElementById("co").checked && !document.getElementById("rl").disabled && !tm)
+     tm = setTimeout(ac, 1000);
+    else
+     document.getElementById("ac").disabled = false;
+   });
+  } else {
+   xr(dev+"/volt.ALL", function(t) {
+    xr(dev+"/pages", function(t) {
+     if (t.status == 200 && typeof t.response === "object" && typeof t.response["page.ALL"] === "string" && rc(t.response["page.ALL"])) {
+      xr(dev+"/pages?page.1="+rf(t.response["page.ALL"]), function(t) {
+       xr(dev+"/volt.ALL", function(t) {
+        xr(dev+"/pages", function(t) {
+         if (t.status == 200 && typeof t.response === "object" && typeof t.response["page.ALL"] === "string")
+          fl(t.response["page.ALL"]);
+         else if (!document.getElementById("rl").disabled)
+          rl(1);
+         if (document.getElementById("co").checked && !document.getElementById("rl").disabled && !tm)
+          tm = setTimeout(ac, 1000);
+         else
+          document.getElementById("ac").disabled = false;
+        });
+       });
+      });
+     } else {
+      if (t.status == 200 && typeof t.response === "object" && typeof t.response["page.ALL"] === "string")
+       fl(t.response["page.ALL"]);
+      else if (!document.getElementById("rl").disabled)
+       rl(1);
+      if (document.getElementById("co").checked && !document.getElementById("rl").disabled && !tm)
+       tm = setTimeout(ac, 1000);
+      else
+       document.getElementById("ac").disabled = false;
+     }
+    });
+   });
+  }
+ });
+}
+function rl(once) {
+ if (!once) tm = null;
+ document.getElementById("rl").disabled = true;
+ xr(dev ? dev+"/pages" : (dir ? dir : ""), dev ? function(t) {
+  if (t.status == 200 && typeof t.response === "object" && typeof t.response["page.ALL"] === "string")
+   fl(t.response["page.ALL"]);
+  else
+   document.getElementById("raw").innerHTML = "<font color=red>Following data is not valid, " +
+    (t.status ? t.status == 404 ? "Device is offline" : "Error "+t.status+" "+t.statusText : "Server read error, check owhttpd") + "</font>";
+  if (!once && document.getElementById("co").checked && !tm)
+   tm = setTimeout(rl, 250);
+  else
+   document.getElementById("rl").disabled = false;
+ } : function (t) {
+  var i, h = "";
+  if (t.status == 200 && typeof t.response === "object")
+   for (i in t.response)
+    h += ((i.substr(0,3) == "20." || i == "alarm") ? "<a href=\"#"+srv+"/"+i+"\">"+i+"</a>" : i) + "<br>";
+  else
+   h = "<font color=red>" + (t.status ? "Error "+t.status+" "+t.statusText : "Server read error, check owhttpd") + "</font>";
+  document.getElementById("ls").innerHTML = h;
+  if (!once && document.getElementById("co").checked && !tm)
+   tm = setTimeout(rl, 1000);
+  else
+   document.getElementById("rl").disabled = false;
+ });
+}
+function cc() {
+ if (!document.getElementById("co").checked && tm) {
+  clearTimeout(tm);
+  document.getElementById("rl").disabled = false;
+  document.getElementById("ac").disabled = false;
+ }
+}
+function ii() {
+ var a = location.hash.replace(/^#/,"").split("/");
+ srv = a[0]; dir = a[1]; dev = undefined;
+ if (dir && dir.match(/^[\da-f]{2}\./i)) { dev = dir; dir = undefined; }
+ document.getElementById("cf").hidden = !!srv;
+ document.getElementById("wr").hidden = !srv;
+ document.getElementById("hd").innerHTML = "<a href=\"#\">/</a> " +
+  ((dev||dir) ? "<a href=\"#"+srv+"\">"+srv+"</a> / " + (dev?dev:dir) : srv);
+ document.getElementById("ls").hidden = !!dev;
+ document.getElementById("dv").hidden = !dev;
+ document.getElementById("db").hidden = !dev;
+ if (srv) rl();
+}
+function ok() {
+ location.hash = document.getElementById("srv").value;
+}
+function ss(n, i) {
+ var k, o = document.getElementById(n);
+ for (k = 0; o.length > k; k++) o[k].selected = (k == i);
+}
+function sg(n) {
+ var k, o = document.getElementById(n);
+ for (k = 0; o.length > k && !o[k].selected; k++);
+ return k >= o.length ? 0 : k;
+}
+function hx(i) {
+ return i>0?256>i?(16>i?"0":"")+i.toString(16):"ff":"00";
+}
+function hs(a,o,n) {
+ var s = "";
+ for (n += o; n > o; o++) s += hx(a[o]);
+ return s;
+}
+function xr(u, f) {
+ var r = new XMLHttpRequest();
+ r.onreadystatechange = function() { if (this.readyState == 4) f(this); };
+ r.responseType = "json";
+ r.open("GET", "http://"+srv+"/json/uncached/"+u, true);
+ r.send();
+}
+</script>
+</head><body onload="ii()" onhashchange="ii()">
+<div id="wr" hidden>
+<b id="hd"></b><br>
+<input id="rl" type=button value="Reload" onclick="rl()">
+<input id="co" type=checkbox onchange="cc()"> continuous
+<span id="db" hidden>&nbsp;&nbsp;<input id="ac" type=button value="Analog convert" onclick="ac()"></span><br>
+<div id="ls"></div>
+<div id="dv" hidden>
+<span id="raw"></span><br>
+<input id="por" type=checkbox onchange="ca()"> power on reset alarm flag<br>
+<table border=1><tr><td>&nbsp;</td><td>P0</td><td>P1</td><td>P2</td><td>P3</td><td>P4</td></tr></tr>
+<tr><td>Alarm flag</td>
+<td><input id="adf0" type=checkbox onchange="ca()"></td>
+<td><input id="adf1" type=checkbox onchange="ca()"></td>
+<td><input id="adf2" type=checkbox onchange="ca()"></td>
+<td><input id="adf3" type=checkbox onchange="ca()"></td>
+<td><input id="adf4" type=checkbox onchange="ca()"></td>
+</tr>
+<tr><td>Watch for</td>
+<td><select id="ade0"><option selected>none<option>low<option>high</select></td>
+<td><select id="ade1"><option selected>none<option>low<option>high</select></td>
+<td><select id="ade2"><option selected>none<option>low<option>high</select></td>
+<td><select id="ade3"><option selected>none<option>low<option>high</select></td>
+<td><select id="ade4"><option selected>none<option>low<option>high</select></td>
+</tr>
+<tr><td>Input read</td>
+<td><span id="di0"></span></td>
+<td><span id="di1"></span></td>
+<td><span id="di2"></span></td>
+<td><span id="di3"></span></td>
+<td><span id="di4"></span></td>
+</tr>
+<tr><td>Pin mode</td>
+<td><select id="dm0"><option selected>in<option>in pullup<option>out low<option>out high</select></td>
+<td><select id="dm1"><option selected>in<option>in pullup<option>out low<option>out PWM</select></td>
+<td><select id="dm2"><option selected>in<option>in pullup<option>out low<option>out high</select></td>
+<td><select id="dm3"><option selected>in<option>in pullup<option>out low<option>out high</select></td>
+<td><select id="dm4"><option selected>in<option>in pullup<option>out low<option>out high</select></td>
+</tr>
+<tr><td>PWM</td><td>&nbsp;</td>
+<td><input id="pwm" type=number size=3 min=0 max=255 step=1></td>
+<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+</tr>
+<tr><td>Alarm flag</td>
+<td><input id="afha" type=checkbox onchange="ca()"> high, <input id="afla" type=checkbox onchange="ca()"> low</td>
+<td>&nbsp;</td>
+<td><input id="afhb" type=checkbox onchange="ca()"> high, <input id="aflb" type=checkbox onchange="ca()"> low</td>
+<td><input id="afhc" type=checkbox onchange="ca()"> high, <input id="aflc" type=checkbox onchange="ca()"> low</td>
+<td><input id="afhd" type=checkbox onchange="ca()"> high, <input id="afld" type=checkbox onchange="ca()"> low</td>
+</tr>
+<tr><td>Check for</td>
+<td><select id="aea"><option selected>none<option>V&lt;thL<option>V&gt;thH<option>V&lt;thL or V&gt;thH</select></td>
+<td>&nbsp;</td>
+<td><select id="aeb"><option selected>none<option>V&lt;thL<option>V&gt;thH<option>V&lt;thL or V&gt;thH</select></td>
+<td><select id="aec"><option selected>none<option>V&lt;thL<option>V&gt;thH<option>V&lt;thL or V&gt;thH</select></td>
+<td><select id="aed"><option selected>none<option>V&lt;thL<option>V&gt;thH<option>V&lt;thL or V&gt;thH</select></td>
+</tr>
+<tr><td>Threshold H</td>
+<td><input id="thha" type=number size=3 min=0 max=255 step=1></td>
+<td>&nbsp;</td>
+<td><input id="thhb" type=number size=3 min=0 max=255 step=1></td>
+<td><input id="thhc" type=number size=3 min=0 max=255 step=1></td>
+<td><input id="thhd" type=number size=3 min=0 max=255 step=1></td>
+</tr>
+<tr><td>Threshold L</td>
+<td><input id="thla" type=number size=3 min=0 max=255 step=1></td>
+<td>&nbsp;</td>
+<td><input id="thlb" type=number size=3 min=0 max=255 step=1></td>
+<td><input id="thlc" type=number size=3 min=0 max=255 step=1></td>
+<td><input id="thld" type=number size=3 min=0 max=255 step=1></td>
+</tr>
+<tr><td>Last Value</td>
+<td><span id="va"></span></td>
+<td>&nbsp;</td>
+<td><span id="vb"></span></td>
+<td><span id="vc"></span></td>
+<td><span id="vd"></span></td>
+</tr>
+<tr><td>Ref &amp; Precis</td>
+<td><select id="rpa">
+<option>VCC, 1bit<option>VCC, 2bit<option>VCC, 3bit<option>VCC, 4bit<option>VCC, 5bit<option>VCC, 6bit<option>VCC, 7bit<option>VCC, 8bit<option>VCC, 9bit<option>VCC, 10bit<option>VCC, 11bit<option>VCC, 12bit<option>VCC, 13bit<option>VCC, 14bit<option>VCC, 15bit<option selected>VCC, 16bit
+<option>1.1V, 1bit<option>1.1V, 2bit<option>1.1V, 3bit<option>1.1V, 4bit<option>1.1V, 5bit<option>1.1V, 6bit<option>1.1V, 7bit<option>1.1V, 8bit<option>1.1V, 9bit<option>1.1V, 10bit<option>1.1V, 11bit<option>1.1V, 12bit<option>1.1V, 13bit<option>1.1V, 14bit<option>1.1V, 15bit<option>1.1V, 16bit
+</select></td>
+<td>&nbsp;</td>
+<td><select id="rpb">
+<option>VCC, 1bit<option>VCC, 2bit<option>VCC, 3bit<option>VCC, 4bit<option>VCC, 5bit<option>VCC, 6bit<option>VCC, 7bit<option>VCC, 8bit<option>VCC, 9bit<option>VCC, 10bit<option>VCC, 11bit<option>VCC, 12bit<option>VCC, 13bit<option>VCC, 14bit<option>VCC, 15bit<option selected>VCC, 16bit
+<option>1.1V, 1bit<option>1.1V, 2bit<option>1.1V, 3bit<option>1.1V, 4bit<option>1.1V, 5bit<option>1.1V, 6bit<option>1.1V, 7bit<option>1.1V, 8bit<option>1.1V, 9bit<option>1.1V, 10bit<option>1.1V, 11bit<option>1.1V, 12bit<option>1.1V, 13bit<option>1.1V, 14bit<option>1.1V, 15bit<option>1.1V, 16bit
+</select></td>
+<td><select id="rpc">
+<option>VCC, 1bit<option>VCC, 2bit<option>VCC, 3bit<option>VCC, 4bit<option>VCC, 5bit<option>VCC, 6bit<option>VCC, 7bit<option>VCC, 8bit<option>VCC, 9bit<option>VCC, 10bit<option>VCC, 11bit<option>VCC, 12bit<option>VCC, 13bit<option>VCC, 14bit<option>VCC, 15bit<option selected>VCC, 16bit
+<option>1.1V, 1bit<option>1.1V, 2bit<option>1.1V, 3bit<option>1.1V, 4bit<option>1.1V, 5bit<option>1.1V, 6bit<option>1.1V, 7bit<option>1.1V, 8bit<option>1.1V, 9bit<option>1.1V, 10bit<option>1.1V, 11bit<option>1.1V, 12bit<option>1.1V, 13bit<option>1.1V, 14bit<option>1.1V, 15bit<option>1.1V, 16bit
+</select></td>
+<td><select id="rpd">
+<option>VCC, 1bit<option>VCC, 2bit<option>VCC, 3bit<option>VCC, 4bit<option>VCC, 5bit<option>VCC, 6bit<option>VCC, 7bit<option>VCC, 8bit<option>VCC, 9bit<option>VCC, 10bit<option>VCC, 11bit<option>VCC, 12bit<option>VCC, 13bit<option>VCC, 14bit<option>VCC, 15bit<option selected>VCC, 16bit
+<option>1.1V, 1bit<option>1.1V, 2bit<option>1.1V, 3bit<option>1.1V, 4bit<option>1.1V, 5bit<option>1.1V, 6bit<option>1.1V, 7bit<option>1.1V, 8bit<option>1.1V, 9bit<option>1.1V, 10bit<option>1.1V, 11bit<option>1.1V, 12bit<option>1.1V, 13bit<option>1.1V, 14bit<option>1.1V, 15bit<option>1.1V, 16bit
+</select></td>
+</tr>
+</table>
+<input id="sv" type=button value="Save" onclick="sv()">
+<input id="ca" type=checkbox onchange="ca(1)"> clear all alarm flags
+</div></div>
+<div id="cf">
+Input owhttpd_address:port <input id="srv" type=text value="127.0.0.1:2121" onkeydown="if(event.keyCode==13)ok()">
+<input type=button value="Ok" onclick="ok()"><br><br>
+If you have already configured and running <a href="https://owfs.org/">owserver</a>, run owhttpd in this way:
+<pre>$ owhttpd -p owhttpd_address:port -s owserver_address:port</pre>
+Or run owhttpd as standalone 1-wire bus master in this way:
+<pre>$ owhttpd -p owhttpd_address:port --passive /dev/ttyUSB0</pre>
+Read <a href="https://owfs.org/uploads/owhttpd.html">owhttpd</a> man page.<br>
+</div>
+</body></html>

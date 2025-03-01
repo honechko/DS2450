@@ -1,0 +1,52 @@
+--- linux-5.4.242/drivers/w1/slaves/Makefile
++++ linux-5.4.242/drivers/w1/slaves/Makefile
+@@ -14,6 +14,7 @@
+ obj-$(CONFIG_W1_SLAVE_DS2805)	+= w1_ds2805.o
+ obj-$(CONFIG_W1_SLAVE_DS2433)	+= w1_ds2433.o
+ obj-$(CONFIG_W1_SLAVE_DS2438)	+= w1_ds2438.o
++obj-$(CONFIG_W1_SLAVE_DS2450)	+= w1_ds2450.o
+ obj-$(CONFIG_W1_SLAVE_DS250X)	+= w1_ds250x.o
+ obj-$(CONFIG_W1_SLAVE_DS2780)	+= w1_ds2780.o
+ obj-$(CONFIG_W1_SLAVE_DS2781)	+= w1_ds2781.o
+--- linux-5.4.242/drivers/w1/slaves/Kconfig
++++ linux-5.4.242/drivers/w1/slaves/Kconfig
+@@ -101,6 +101,39 @@
+ 	  Say Y here if you want to use a 1-wire
+ 	  DS2438 Smart Battery Monitor device support
+ 
++config W1_SLAVE_DS2450
++	tristate "DS2450 compatible Port Expander 0x20 family support"
++	select CRC16
++	help
++	  Say Y here if you want to use a 1-wire DS2450 compatible
++	  Port Expander
++
++config W1_SLAVE_DS2450_SPI
++	bool "Include 1-wire to SPI-master bridge support"
++	depends on W1_SLAVE_DS2450 && SPI
++	default y
++	help
++	  Say Y here to include support for 1-wire to SPI-master bridge
++	  extension.
++
++config W1_SLAVE_DS2450_GPIO
++	bool "Include GPIO framework support"
++	depends on W1_SLAVE_DS2450 && GPIOLIB
++	help
++	  Say Y here to include GPIO framework support.
++
++config W1_SLAVE_DS2450_PWM
++	bool "Include PWM framework support"
++	depends on W1_SLAVE_DS2450 && PWM
++	help
++	  Say Y here to include PWM framework support.
++
++config W1_SLAVE_DS2450_IIO
++	bool "Include Industrial IO framework support"
++	depends on W1_SLAVE_DS2450 && IIO
++	help
++	  Say Y here to include Industrial IO framework support.
++
+ config W1_SLAVE_DS250X
+ 	tristate "512b/1kb/16kb EPROM family support"
+ 	select CRC16
